@@ -109,8 +109,7 @@ TS()
     printf("UID\tTID\tNAME\tPRI\tSTATUS\n");
     for (int i = 0; i < maxThreadsCount; i++) { // check pid flag
         if (threads[i]) {
-            printf("%d\t%d\t%s\t%s\n", pointThreads[i]->getUid(), pointThreads[i]->getTid(), 
-pointThreads[i]->getName(), TStoString[pointThreads[i]->getStatus()]);
+            printf("%d\t%d\t%s\t%s\n", pointThreads[i]->getUid(), pointThreads[i]->getTid(), pointThreads[i]->getName(), TStoString[pointThreads[i]->getStatus()]);
         }
     }
 }
@@ -130,6 +129,8 @@ CustomThreadFunc(int which)
             break;
         case 1:
             printf("Sleep\n");
+            // line 246, file "../threads/thread.cc"
+            // Assert interrupt is off
             oldLevel = interrupt->SetLevel(IntOff);	// disable interrupts
             currentThread->Sleep();
             (void) interrupt->SetLevel(oldLevel);	// re-enable interrupts
@@ -159,7 +160,6 @@ Lab1Exercise4_2()
     t3->Fork(CustomThreadFunc, (void*)2);
 
     Thread *t4 = new Thread("fork 4");
-
 
     CustomThreadFunc(0); // Yield the current thread (i.e. main which is defined in system.cc)
 

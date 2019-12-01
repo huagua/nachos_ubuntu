@@ -35,9 +35,8 @@ Machine *machine;	// user program memory and registers
 PostOffice *postOffice;
 #endif
 
-//lab1
 int threads[maxThreadsCount] = {0};
-Thread* pointThreads[maxThreadsCount];
+
 
 // External definition, to allow us to take a pointer to this function
 extern void Cleanup();
