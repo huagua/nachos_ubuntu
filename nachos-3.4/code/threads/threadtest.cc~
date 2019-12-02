@@ -14,7 +14,7 @@
 #include "elevatortest.h"
 
 // testnum is set in main.cc
-int testnum = 4;
+int testnum = 7;
 
 //----------------------------------------------------------------------
 // SimpleThread
@@ -42,7 +42,8 @@ Lab1Exercise3Thread(int which)
     int num;
     
     for (num = 0; num < 5; num++) {
-        printf("*** thread %d (uid=%d, tid=%d) looped %d times\n", which, currentThread->getUid(), currentThread->getTid(), num);
+        printf("*** thread %d (uid=%d, tid=%d) looped %d times\n", 
+which, currentThread->getUid(), currentThread->getTid(), num);
         currentThread->Yield();
     }
 }
@@ -109,7 +110,8 @@ TS()
     printf("UID\tTID\tNAME\tPRI\tSTATUS\n");
     for (int i = 0; i < maxThreadsCount; i++) { // check pid flag
         if (threads[i]) {
-            printf("%d\t%d\t%s\t%s\n", pointThreads[i]->getUid(), pointThreads[i]->getTid(), pointThreads[i]->getName(), TStoString[pointThreads[i]->getStatus()]);
+            printf("%d\t%d\t%s\t%d\t%s\n", pointThreads[i]->getUid(), pointThreads[i]->getTid(), 
+pointThreads[i]->getName(), pointThreads[i]->getPriority(), TStoString[pointThreads[i]->getStatus()]);
         }
     }
 }
@@ -117,7 +119,8 @@ TS()
 void
 CustomThreadFunc(int which)
 {
-    printf("*** current thread (uid=%d, tid=%d, name=%s) => ", currentThread->getUid(), currentThread->getTid(),currentThread->getName());
+    printf("*** current thread (uid=%d, tid=%d, priority=%d, name=%s) => ",
+ currentThread->getUid(), currentThread->getTid(),currentThread->getPriority(),currentThread->getName());
     IntStatus oldLevel; // for case 1 sleep (avoid cross initialization problem of switch case)
     switch (which)
     {
@@ -129,8 +132,6 @@ CustomThreadFunc(int which)
             break;
         case 1:
             printf("Sleep\n");
-            // line 246, file "../threads/thread.cc"
-            // Assert interrupt is off
             oldLevel = interrupt->SetLevel(IntOff);	// disable interrupts
             currentThread->Sleep();
             (void) interrupt->SetLevel(oldLevel);	// re-enable interrupts
@@ -161,11 +162,91 @@ Lab1Exercise4_2()
 
     Thread *t4 = new Thread("fork 4");
 
+
     CustomThreadFunc(0); // Yield the current thread (i.e. main which is defined in system.cc)
 
     printf("--- Calling TS command ---\n");
     TS();
     printf("--- End of TS command ---\n");
+}
+
+void
+Lab2Exercise3_1()
+{
+    DEBUG('t', "Entering Lab2Exercise3_1");
+
+    Thread *t1 = new Thread("with p", 87);
+
+    Thread *t2 = new Thread("set p");
+    t2->setPriority(100);
+
+    Thread *t3 = new Thread("no p");
+
+    t1->Fork(CustomThreadFunc, (void*)0);
+    t2->Fork(CustomThreadFunc, (void*)0);
+    t3->Fork(CustomThreadFunc, (void*)0);
+
+    CustomThreadFunc(0); // Yield the current thread
+
+    printf("--- Calling TS command ---\n");
+    TS();
+    printf("--- End of TS command ---\n");
+}
+
+void
+Lab2Exercise3_2()
+{
+    DEBUG('t', "Entering Lab2Exercise3_2");
+
+    Thread *t1 = new Thread("lower", 78);
+    Thread *t2 = new Thread("highest", 87);
+    Thread *t3 = new Thread("lowest", 38);
+
+    t1->Fork(CustomThreadFunc, (void*)0);
+    t2->Fork(CustomThreadFunc, (void*)0);
+    t3->Fork(CustomThreadFunc, (void*)0);
+
+    CustomThreadFunc(0);
+
+    printf("--- Calling TS command ---\n");
+    TS();
+    printf("--- End of TS command ---\n\n");
+}
+
+void
+ThreadWithTicks(int runningTime)
+{
+    int num;
+    
+    for (num = 0; num < runningTime * SystemTick; num++) {
+        printf("*** thread with running time %d looped %d times (stats->totalTicks: %d)\n", runningTime, num+1, stats->totalTicks);
+        interrupt->OneTick();
+    }
+
+    currentThread->Finish();
+}
+
+void
+Lab2ChallengeRR()
+{
+    DEBUG('t', "Entering Lab2ChallengeRR");
+
+    printf("\nSystem initial ticks:\tsystem=%d, user=%d, total=%d\n", stats->systemTicks, stats->userTicks, stats->totalTicks);
+
+    Thread *t1 = new Thread("7");
+    Thread *t2 = new Thread("2");
+    Thread *t3 = new Thread("5");
+
+    printf("\nAfter new Thread ticks:\tsystem=%d, user=%d, total=%d\n", stats->systemTicks, stats->userTicks, stats->totalTicks);
+
+    t1->Fork(ThreadWithTicks, (void*)7);
+    t2->Fork(ThreadWithTicks, (void*)2);
+    t3->Fork(ThreadWithTicks, (void*)5);
+
+    printf("\nAfter 3 fork() ticks:\tsystem=%d, user=%d, total=%d\n\n", stats->systemTicks, stats->userTicks, stats->totalTicks);
+
+    scheduler->lastSwitchTick = stats->totalTicks;
+    currentThread->Yield();
 }
 
 //----------------------------------------------------------------------
@@ -177,7 +258,8 @@ void
 ThreadTest()
 {
     switch (testnum) {
-    case 1:
+
+    	case 1:
 	ThreadTest1();
 	break;
 
@@ -194,6 +276,22 @@ ThreadTest()
 	case 4:
         printf("Lab1 Exercise4-2:\n");
         Lab1Exercise4_2();
+        break;
+
+	case 5:
+	printf("lab2 Exercise3-1:\n");
+	Lab2Exercise3_1();
+	break;
+
+	case 6:
+	printf("lab2 Exercise3-2:\n");
+	Lab2Exercise3_2();
+	break;
+
+	case 7:
+        printf("Lab2 Challenge RR:\n");
+        printf("(don't forget to add `-rr` argument to activate timer)\n");
+        Lab2ChallengeRR();
         break;
 
     default:

@@ -81,6 +81,10 @@ class Thread {
 
   public:
     Thread(char* debugName);		// initialize a Thread 
+
+	//lab2 add p
+	Thread(char* debugName,int p);
+
     ~Thread(); 				// deallocate a Thread
 					// NOTE -- thread being deleted
 					// must not be running when delete 
@@ -108,6 +112,10 @@ class Thread {
 	int getTid(){return tid;};
 	ThreadStatus getStatus(){return status;};
 
+	//lab2
+	void setPriority(int pri){priority = pri;};
+	int getPriority(){return priority;};
+
   private:
     // some of the private data for this class is listed above
     
@@ -117,8 +125,12 @@ class Thread {
     ThreadStatus status;		// ready, running or blocked
     char* name;
 
+	//lab1
 	int tid;
 	int uid;
+
+	//lab2
+	int priority;
 
     void StackAllocate(VoidFunctionPtr func, void *arg);
     					// Allocate a stack for thread.

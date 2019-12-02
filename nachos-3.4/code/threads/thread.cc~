@@ -34,8 +34,11 @@
 //	"threadName" is an arbitrary string, useful for debugging.
 //----------------------------------------------------------------------
 
-Thread::Thread(char* threadName)
+Thread::Thread(char* threadName,int p)
 {
+	//lab2
+	priority = p;
+
     name = threadName;
 	int flag = 0;
 	int i = 0;
@@ -51,13 +54,20 @@ Thread::Thread(char* threadName)
 	printf("Reach the max threads number!");
 
 found:
+	//lab1
 	uid = 1;
+
     stackTop = NULL;
     stack = NULL;
     status = JUST_CREATED;
 #ifdef USER_PROGRAM
     space = NULL;
 #endif
+}
+
+Thread::Thread(char* threadName)
+    : Thread(threadName, 0)
+{
 }
 
 //----------------------------------------------------------------------
@@ -336,34 +346,4 @@ Thread::RestoreUserState()
 }
 #endif
 
-void
-CustomThreadFunc(int which)
-{
-    printf("*** current thread (uid=%d, tid=%d, name=%s) => ", currentThread->getUid(), currentThread->getTid(),currentThread->getName());
-    IntStatus oldLevel; // for case 1 sleep (avoid cross initialization problem of switch case)
-    switch (which)
-    {
-        case 0:
-            printf("Yield\n");
-            scheduler->Print();
-            printf("\n\n");
-            currentThread->Yield();
-            break;
-        case 1:
-            printf("Sleep\n");
-            // line 246, file "../threads/thread.cc"
-            // Assert interrupt is off
-            oldLevel = interrupt->SetLevel(IntOff);	// disable interrupts
-            currentThread->Sleep();
-            (void) interrupt->SetLevel(oldLevel);	// re-enable interrupts
-            break;
-        case 2:
-            printf("Finish\n");
-            currentThread->Finish();
-            break;
-        default:
-            printf("Yield (default)\n");
-            currentThread->Yield();
-            break;
-    }
-}
+

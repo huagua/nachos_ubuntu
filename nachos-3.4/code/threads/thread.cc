@@ -34,7 +34,8 @@
 //	"threadName" is an arbitrary string, useful for debugging.
 //----------------------------------------------------------------------
 
-Thread::Thread(char* threadName)
+Thread::Thread(char* threadName,int p)
+    : priority( p )//lab2
 {
     name = threadName;
 	int flag = 0;
@@ -51,13 +52,20 @@ Thread::Thread(char* threadName)
 	printf("Reach the max threads number!");
 
 found:
+	//lab1
 	uid = 1;
+
     stackTop = NULL;
     stack = NULL;
     status = JUST_CREATED;
 #ifdef USER_PROGRAM
     space = NULL;
 #endif
+}
+
+Thread::Thread(char* threadName)
+    : Thread(threadName, 0)
+{
 }
 
 //----------------------------------------------------------------------

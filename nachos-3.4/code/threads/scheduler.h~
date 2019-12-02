@@ -29,7 +29,7 @@ class Scheduler {
     void Print();			// Print contents of ready list
     
 	//lab2
-	int lastSwitchTick;	//记录上次上下文切换的时间
+	//int lastSwitchTick;	//记录上次上下文切换的时间
 
   private:
     List *readyList;  		// queue of threads that are ready to run,
@@ -37,6 +37,6 @@ class Scheduler {
 };
 
 //lab2
-extern void PRHandler(int dummy);	//当计时器中断重新记录就绪列表
+//extern void PRHandler(int dummy);	//当计时器中断重新记录就绪列表
 
 #endif // SCHEDULER_H
