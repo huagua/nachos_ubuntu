@@ -87,6 +87,39 @@ Machine::~Machine()
         delete [] tlb;
 }
 
+#ifdef USER_PROGRAM
+
+int
+Machine::allocateFrame(void)
+{
+    int shift;
+    for (shift = 0; shift < NumPhysPages; shift++) {
+        if (!(bitmap >> shift & 0x1)) { // found empty bit
+            bitmap |= 0x1 << shift; // set the bit to used
+            DEBUG('M', "Allocate physical page frame: %d\n", shift);
+            return shift;
+        }
+    }
+    DEBUG('M', "Out of physical page frame!\n", shift);
+    return -1;
+}
+
+void
+Machine::freeMem(void)
+{
+    for (int i = 0; i < pageTableSize; i++) {
+        if (pageTable[i].valid) { // Free the "used" page frame
+            int pageFrameNum = pageTable[i].physicalPage;
+            bitmap &= ~(0x1 << pageFrameNum);
+            DEBUG('M', "Free physical page frame: %d\n", pageFrameNum);
+        }
+    }
+    DEBUG('M', "Bitmap after freed: %08X\n", bitmap);
+}
+
+#endif // USER_PROGRAM
+
+
 //----------------------------------------------------------------------
 // Machine::RaiseException
 // 	Transfer control to the Nachos kernel from user mode, because

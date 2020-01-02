@@ -117,6 +117,12 @@ class Machine {
 				// for running user programs
     ~Machine();			// De-allocate the data structures
 
+	//lab3 exercise4
+    unsigned int bitmap; 	// This can record 32 allocation units (sizeof(int)*8 = 32). Current NumPhysPages is 32 too.
+    int allocateFrame(void);	// Find a empty allocation unit to put physical page frames
+    void freeMem(void);		 // Free current page table physical page frames
+
+
 // Routines callable by the Nachos kernel
     void Run();	 		// Run a user program
 
