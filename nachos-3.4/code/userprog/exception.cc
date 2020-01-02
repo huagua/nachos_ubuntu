@@ -86,6 +86,60 @@ TLBAlgoClock(TranslationEntry page)
 }
 #endif
 
+int
+NaivePageReplacement(int vpn)
+{
+    int pageFrame = -1;
+    for (int temp_vpn = 0; temp_vpn < machine->pageTableSize, temp_vpn != vpn; temp_vpn++) {
+        if (machine->pageTable[temp_vpn].valid) {
+            if (!machine->pageTable[temp_vpn].dirty) {
+                pageFrame = machine->pageTable[temp_vpn].physicalPage;
+                break;
+            }
+        }
+    }
+    if (pageFrame == -1) { // No non-dirty entry
+        for (int replaced_vpn = 0; replaced_vpn < machine->pageTableSize, replaced_vpn != vpn; replaced_vpn++) {
+            if (machine->pageTable[replaced_vpn].valid) {
+                machine->pageTable[replaced_vpn].valid = FALSE;
+                pageFrame = machine->pageTable[replaced_vpn].physicalPage;
+
+                // Store the page back to disk
+                OpenFile *vm = fileSystem->Open("VirtualMemory");
+                vm->WriteAt(&(machine->mainMemory[pageFrame*PageSize]), PageSize, replaced_vpn*PageSize);
+                delete vm; // close file
+                break;
+            }
+        }
+    }
+    return pageFrame;
+}
+
+
+TranslationEntry
+PageFaultHandler(int vpn)
+{
+    // Get a Memory space (page frame) to allocate
+    int pageFrame = machine->allocateFrame(); // ppn
+    if (pageFrame == -1) { // Need page replacement
+        pageFrame = NaivePageReplacement(vpn);
+    }
+    machine->pageTable[vpn].physicalPage = pageFrame;
+
+    // Load the Page from virtual memory
+    DEBUG('a', "Demand paging: loading page from virtual memory!\n");
+    OpenFile *vm = fileSystem->Open("VirtualMemory"); // This file is created in userprog/addrspace.cc
+
+    vm->ReadAt(&(machine->mainMemory[pageFrame*PageSize]), PageSize, vpn*PageSize);
+    delete vm; // close the file
+
+    // Set the page attributes
+    machine->pageTable[vpn].valid = TRUE;
+    machine->pageTable[vpn].use = FALSE;
+    machine->pageTable[vpn].dirty = FALSE;
+    machine->pageTable[vpn].readOnly = FALSE;
+}
+
 void
 TLBMissHandler(int virtAddr)
 {
@@ -94,6 +148,11 @@ TLBMissHandler(int virtAddr)
 
 // Find the Page
     TranslationEntry page = machine->pageTable[vpn];
+
+    if (!page.valid) { // Lab3
+	printf("page miss -->");
+        page = PageFaultHandler(vpn);
+    }
 
     // Update TLB
 #if TLB_FIFO

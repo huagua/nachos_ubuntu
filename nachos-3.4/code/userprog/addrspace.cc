@@ -83,14 +83,20 @@ AddrSpace::AddrSpace(OpenFile *executable)
 						// at least until we have
 						// virtual memory
 
-    DEBUG('a', "Initializing address space, num pages %d, size %d\n", 
-					numPages, size);
+    //DEBUG('a', "Initializing address space, num pages %d, size %d\n", 
+	//				numPages, size);
+
+    // Create a virtual memory with the size that the executable file need.
+    DEBUG('a', "Demand paging: creating virtual memory!\n");
+    bool success_create_vm = fileSystem->Create("VirtualMemory", size);
+
+
 // first, set up the translation 
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++) {
 	pageTable[i].virtualPage = machine->allocateFrame();	// for now, virtual page # = phys page #
 	pageTable[i].physicalPage = i;
-	pageTable[i].valid = TRUE;
+	pageTable[i].valid = FALSE;
 	pageTable[i].use = FALSE;
 	pageTable[i].dirty = FALSE;
 	pageTable[i].readOnly = FALSE;  // if the code segment was entirely on 
@@ -98,23 +104,63 @@ AddrSpace::AddrSpace(OpenFile *executable)
 					// pages to be read-only
     }
     
+
+#if USE_BITMAP
 // zero out the entire address space, to zero the unitialized data segment 
 // and the stack segment
     bzero(machine->mainMemory, size);
+
+    DEBUG('a', "Demand paging: copy executable to virtual memory!\n");
+
+    OpenFile *vm = fileSystem->Open("VirtualMemory");
+
+    char *virtualMemory_temp;
+    virtualMemory_temp = new char[size];
+    for (i = 0; i < size; i++)
+        virtualMemory_temp[i] = 0;
 
 // then, copy in the code and data segments into memory
     if (noffH.code.size > 0) {
         DEBUG('a', "Initializing code segment, at 0x%x, size %d\n", 
 			noffH.code.virtualAddr, noffH.code.size);
+/*
         executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]),
 			noffH.code.size, noffH.code.inFileAddr);
+*/
+	executable->ReadAt(&(virtualMemory_temp[noffH.code.virtualAddr]),
+                           noffH.code.size, noffH.code.inFileAddr);
+        vm->WriteAt(&(virtualMemory_temp[noffH.code.virtualAddr]),
+                    noffH.code.size, noffH.code.virtualAddr*PageSize);
+   
     }
     if (noffH.initData.size > 0) {
         DEBUG('a', "Initializing data segment, at 0x%x, size %d\n", 
 			noffH.initData.virtualAddr, noffH.initData.size);
+/*
         executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr]),
 			noffH.initData.size, noffH.initData.inFileAddr);
+*/
+	executable->ReadAt(&(virtualMemory_temp[noffH.initData.virtualAddr]),
+                           noffH.initData.size, noffH.initData.inFileAddr);
+        vm->WriteAt(&(virtualMemory_temp[noffH.initData.virtualAddr]),
+                    noffH.initData.size, noffH.initData.virtualAddr*PageSize);
     }
+    delete vm; // Close the file
+#elif INVERTED_PAGETABLE
+
+for (i = 0; i < numPages; i++) {
+        machine->pageTable[i].physicalPage = machine->allocateFrame(); 
+        machine->pageTable[i].valid = TRUE;
+        machine->pageTable[i].use = FALSE;
+        machine->pageTable[i].dirty = FALSE;
+        machine->pageTable[i].readOnly = FALSE;
+
+        machine->pageTable[i].threadId = currentThread->getThreadId(); 
+    }
+    DEBUG('M', "Initialized memory for thread \"%s\".\n", currentThread->getName());
+
+
+#endif
 
 }
 
@@ -181,6 +227,8 @@ void AddrSpace::SaveState()
 
 void AddrSpace::RestoreState() 
 {
+#ifndef INVERTED_PAGETABLE
     machine->pageTable = pageTable;
     machine->pageTableSize = numPages;
+#endif
 }
