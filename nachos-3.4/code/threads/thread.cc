@@ -38,11 +38,9 @@ Thread::Thread(char* threadName,int p)
     : priority( p )//lab2
 {
     name = threadName;
-	int flag = 0;
 	int i = 0;
 	for(i = 0; i < maxThreadsCount; i++){
 		if(threads[i] == 0){
-			flag = 1;
 			tid = i;
 			threads[i] = 1;
 			pointThreads[i] = this;
@@ -84,6 +82,7 @@ Thread::~Thread()
 {
     DEBUG('t', "Deleting thread \"%s\"\n", name);
 
+	threads[tid] = 0;
     ASSERT(this != currentThread);
     if (stack != NULL)
 	DeallocBoundedArray((char *) stack, StackSize * sizeof(int));
