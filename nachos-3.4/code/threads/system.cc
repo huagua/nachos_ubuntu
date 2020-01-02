@@ -84,6 +84,12 @@ Initialize(int argc, char **argv)
     char* debugArgs = "";
     bool randomYield = FALSE;
 
+	// Lab1: Initialize thread variable
+    for (int i = 0; i < maxThreadsCount; i++) {
+        threads[i] = FALSE;
+        pointThreads[i] = NULL;
+    }
+
 #ifdef USER_PROGRAM
     bool debugUserProg = FALSE;	// single step user program
 #endif
