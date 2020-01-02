@@ -51,6 +51,18 @@ FileHeader::Allocate(BitMap *freeMap, int fileSize)
     return TRUE;
 }
 
+//lab5
+void
+FileHeader::HeaderCreateInit(char* ext)
+{
+    setFileType(ext);
+
+    char* currentTimeString = getCurrentTime();
+    setCreateTime(currentTimeString);
+    setModifyTime(currentTimeString);
+    setVisitTime(currentTimeString);
+}
+
 //----------------------------------------------------------------------
 // FileHeader::Deallocate
 // 	De-allocate all the space allocated for data blocks for this file.
@@ -65,6 +77,15 @@ FileHeader::Deallocate(BitMap *freeMap)
 	ASSERT(freeMap->Test((int) dataSectors[i]));  // ought to be marked!
 	freeMap->Clear((int) dataSectors[i]);
     }
+}
+
+char*
+getCurrentTime(void)
+{
+    time_t rawtime;
+    time(&rawtime);
+    struct tm* currentTime = localtime(&rawtime);
+    return asctime(currentTime); // This somehow will generate extra '\n'
 }
 
 //----------------------------------------------------------------------

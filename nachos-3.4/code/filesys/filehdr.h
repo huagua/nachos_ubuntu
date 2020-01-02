@@ -17,7 +17,19 @@
 #include "disk.h"
 #include "bitmap.h"
 
-#define NumDirect 	((SectorSize - 2 * sizeof(int)) / sizeof(int))
+#include <time.h> // Lab5: for created time, modified time, last visited time
+#include <libgen.h> // Lab5: for dirname and basename
+
+// Disk part
+#define NumOfIntHeaderInfo 2
+#define NumOfTimeHeaderInfo 3
+#define LengthOfTimeHeaderStr 26 // 25 + 1 ('/0')
+#define MaxExtLength 5           // 4  + 1 ('/0')
+#define LengthOfAllString MaxExtLength + NumOfTimeHeaderInfo*LengthOfTimeHeaderStr
+
+#define NumDirect 	((SectorSize - (NumOfIntHeaderInfo*sizeof(int) + LengthOfAllString*sizeof(char))) / sizeof(int))
+
+//#define NumDirect 	((SectorSize - 2 * sizeof(int)) / sizeof(int))
 #define MaxFileSize 	(NumDirect * SectorSize)
 
 // The following class defines the Nachos "file header" (in UNIX terms,  
@@ -56,11 +68,29 @@ class FileHeader {
 
     void Print();			// Print the contents of the file.
 
+	//lab5
+    void HeaderCreateInit(char* ext); // Initialize all header message for creation
+    void setFileType(char* ext) { strcmp(ext, "") ? strcpy(fileType, ext) : strcpy(fileType, "None"); }
+    void setCreateTime(char* t) { strcpy(createdTime, t); }
+    void setModifyTime(char* t) { strcpy(modifiedTime, t); }
+    void setVisitTime(char* t) { strcpy(lastVisitedTime, t); }
+    char* getFileType() { return strdup(fileType); }
+
   private:
     int numBytes;			// Number of bytes in the file
     int numSectors;			// Number of data sectors in the file
     int dataSectors[NumDirect];		// Disk sector numbers for each data 
 					// block in the file
+
+	//lab5
+    char fileType[MaxExtLength];
+    char createdTime[LengthOfTimeHeaderStr];
+    char modifiedTime[LengthOfTimeHeaderStr];
+    char lastVisitedTime[LengthOfTimeHeaderStr];
 };
+
+//lab5
+extern char* getCurrentTime(void);
+
 
 #endif // FILEHDR_H

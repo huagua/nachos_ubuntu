@@ -19,8 +19,14 @@
 
 #include "openfile.h"
 
+//lab5
+#define NumDirEntries 		10
+#define FileNameMaxLen		(((SectorSize - (sizeof(bool) + sizeof(int)) * NumDirEntries) / sizeof(char)) - 1)
+
+/*
 #define FileNameMaxLen 		9	// for simplicity, we assume 
 					// file names are <= 9 characters long
+*/
 
 // The following class defines a "directory entry", representing a file
 // in the directory.  Each entry gives the name of the file, and where
