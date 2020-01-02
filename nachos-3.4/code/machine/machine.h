@@ -71,6 +71,13 @@ enum ExceptionType { NoException,           // Everything ok!
 
 #define NumTotalRegs 	40
 
+// Lab3: Page Fault and TLB Miss Handler
+// Exercise 2 and 3
+void TLBMissHandler(int virtAddr);
+// Exercise 3
+void TLBAlgoFIFO(TranslationEntry page);
+void TLBAlgoClock(TranslationEntry page);
+
 // The following class defines an instruction, represented in both
 // 	undecoded binary form
 //      decoded to identify

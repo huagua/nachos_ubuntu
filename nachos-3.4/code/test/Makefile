@@ -35,7 +35,7 @@ CPP = gcc -E
 INCDIR =-I../userprog -I../threads
 CFLAGS = -G 0 -c $(INCDIR)
 
-all: halt shell matmult sort
+all: halt shell matmult sort fibonacci
 
 start.o: start.s ../userprog/syscall.h
 	$(CPP) $(CPPFLAGS) start.c > strt.s
@@ -59,6 +59,12 @@ sort.o: sort.c
 sort: sort.o start.o
 	$(LD) $(LDFLAGS) start.o sort.o -o sort.coff
 	../bin/coff2noff sort.coff sort
+
+fibonacci.o: fibonacci.c
+	$(CC) $(CFLAGS) -c fibonacci.c
+fibonacci: fibonacci.o start.o
+	$(LD) $(LDFLAGS) start.o fibonacci.o -o fibonacci.coff
+	../bin/coff2noff fibonacci.coff fibonacci
 
 matmult.o: matmult.c
 	$(CC) $(CFLAGS) -c matmult.c
