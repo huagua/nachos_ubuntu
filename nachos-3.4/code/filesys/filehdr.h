@@ -27,10 +27,18 @@
 #define MaxExtLength 5           // 4  + 1 ('/0')
 #define LengthOfAllString MaxExtLength + NumOfTimeHeaderInfo*LengthOfTimeHeaderStr
 
+#ifndef INDIRECT_MAP
 #define NumDirect 	((SectorSize - (NumOfIntHeaderInfo*sizeof(int) + LengthOfAllString*sizeof(char))) / sizeof(int))
-
-//#define NumDirect 	((SectorSize - 2 * sizeof(int)) / sizeof(int))
 #define MaxFileSize 	(NumDirect * SectorSize)
+#else
+#define NumDataSectors ((SectorSize - (NumOfIntHeaderInfo*sizeof(int) + LengthOfAllString*sizeof(char))) / sizeof(int))
+#define NumDirect (NumDataSectors - 2)
+#define IndirectSectorIdx (NumDataSectors - 2)
+#define DoubleIndirectSectorIdx (NumDataSectors - 1)
+#define MaxFileSize (NumDirect * SectorSize) + \
+                    ((SectorSize / sizeof(int)) * SectorSize) + \
+                    ((SectorSize / sizeof(int)) * ((SectorSize / sizeof(int)) * SectorSize))
+#endif
 
 // The following class defines the Nachos "file header" (in UNIX terms,  
 // the "i-node"), describing where on disk to find all of the data in the file.
