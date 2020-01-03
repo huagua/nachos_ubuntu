@@ -91,7 +91,7 @@ FileSystem::FileSystem(bool format)
 	mapHdr->HeaderCreateInit("BMap");
 	
 	FileHeader *dirHdr = new FileHeader;
-	dirHdr->HeaderCreateInit("DirH");
+	dirHdr->HeaderCreateInit(DirFileExt);
 
         DEBUG('f', "Formatting the file system.\n");
 
