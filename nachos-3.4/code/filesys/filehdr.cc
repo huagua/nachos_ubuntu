@@ -113,6 +113,35 @@ FileHeader::HeaderCreateInit(char* ext)
     setVisitTime(currentTimeString);
 }
 
+FilePath
+pathParser(char* path)
+{
+    if (path[0] == '/')
+        path = &path[1]; // Don't count the first '/'
+
+    char* ts1 = strdup(path);
+    char* ts2 = strdup(path);
+
+    FilePath filepath;
+
+    // The return of basename() will be the copy pointer of input!!
+    char* currentDir = dirname(ts1);
+    filepath.base = strdup(basename(ts2)); 
+
+    // See how depth the path is
+    int depth;
+    for (depth = 0; path[depth]; path[depth] == '/' ? depth++ : *path++);
+    filepath.dirDepth = depth;
+
+    // Not in current directory. Travel to the directory
+    while (strcmp(currentDir, ".")) { // while currentDir is not "."
+        filepath.dirArray[--depth] = strdup(basename(currentDir));
+        currentDir = dirname(currentDir);
+    }
+
+    return filepath;
+}
+
 //----------------------------------------------------------------------
 // FileHeader::Deallocate
 // 	De-allocate all the space allocated for data blocks for this file.

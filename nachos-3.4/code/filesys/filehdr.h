@@ -102,6 +102,17 @@ class FileHeader {
 	int headerSector;
 };
 
+#define MAX_DIR_DEPTH 5 
+
+typedef struct {
+    char* dirArray[MAX_DIR_DEPTH];
+    int dirDepth; // if root dir, dir depth = 0
+    char* base;
+} FilePath;
+
+extern FilePath pathParser(char* path);
+
+
 //lab5
 extern char* getCurrentTime(void);
 extern char* getFileExtension(char *filename);

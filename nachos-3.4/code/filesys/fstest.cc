@@ -183,3 +183,13 @@ PerformanceTest()
     stats->Print();
 }
 
+#ifdef MULTI_LEVEL_DIR
+
+void
+MakeDir(char *dirname)
+{
+    fileSystem->Create(dirname, -1);
+}
+
+#endif
+

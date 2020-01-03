@@ -85,6 +85,14 @@ class FileSystem {
 
     void Print();			// List all the files and their contents
 
+#ifdef MULTI_LEVEL_DIR
+    // Lab5
+    void* FindDir(char *filePath); 			// Return the directory the file locate at (the return format is Directory*)
+    int FindDirSector(char *filePath); 			// Return the sector of the file's directory
+    bool RemoveDir(char *name);  			// Delete a file (UNIX unlink)
+    void ListDir(char *name);
+#endif
+
   private:
    OpenFile* freeMapFile;		// Bit map of free disk blocks,
 					// represented as a file
