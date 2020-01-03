@@ -76,6 +76,10 @@ class FileHeader {
     void setVisitTime(char* t) { strcpy(lastVisitedTime, t); }
     char* getFileType() { return strdup(fileType); }
 
+// In-core part
+    void setHeaderSector(int sector) { headerSector = sector; }
+    int getHeaderSector() { return headerSector; }
+
   private:
     int numBytes;			// Number of bytes in the file
     int numSectors;			// Number of data sectors in the file
@@ -87,10 +91,12 @@ class FileHeader {
     char createdTime[LengthOfTimeHeaderStr];
     char modifiedTime[LengthOfTimeHeaderStr];
     char lastVisitedTime[LengthOfTimeHeaderStr];
+	int headerSector;
 };
 
 //lab5
 extern char* getCurrentTime(void);
+extern char* getFileExtension(char *filename);
 
 
 #endif // FILEHDR_H

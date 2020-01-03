@@ -31,6 +31,7 @@ OpenFile::OpenFile(int sector)
 { 
     hdr = new FileHeader;
     hdr->FetchFrom(sector);
+    hdr->setHeaderSector(sector);
     seekPosition = 0;
 }
 
@@ -41,6 +42,7 @@ OpenFile::OpenFile(int sector)
 
 OpenFile::~OpenFile()
 {
+    hdr->WriteBack(hdr->getHeaderSector()); 
     delete hdr;
 }
 

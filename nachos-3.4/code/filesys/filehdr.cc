@@ -80,6 +80,14 @@ FileHeader::Deallocate(BitMap *freeMap)
 }
 
 char*
+getFileExtension(char *filename)
+{
+    char *dot = strrchr(filename, '.');
+    if(!dot || dot == filename) return "";
+    return dot + 1;
+}
+
+char*
 getCurrentTime(void)
 {
     time_t rawtime;
