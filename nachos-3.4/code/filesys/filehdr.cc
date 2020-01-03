@@ -319,3 +319,31 @@ FileHeader::Print()
     }
     delete [] data;
 }
+
+bool
+FileHeader::ExpandFileSize(BitMap *freeMap, int additionalBytes)
+{
+    ASSERT(additionalBytes > 0);
+    numBytes += additionalBytes;
+    int initSector = numSectors;
+    numSectors = divRoundUp(numBytes, SectorSize);
+    if (initSector == numSectors) {
+        return TRUE; // no need more sector
+    }
+    int sectorsToExpand = numSectors - initSector;
+    if (freeMap->NumClear() < sectorsToExpand) {
+        return FALSE; // no more space to allocate
+    }
+
+    DEBUG('f', "Expanding file size for %d sectors (%d bytes)\n", sectorsToExpand, additionalBytes);
+
+    if (numSectors < NumDirect) { // just like FileHeader::Allocate
+        for (int i = initSector; i < numSectors; i++)
+            dataSectors[i] = freeMap->Find();
+    } else {
+        printf("File size exceeded the maximum representation of the direct map");
+    }
+    return TRUE;
+}
+
+

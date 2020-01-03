@@ -51,6 +51,8 @@ static Console *console;
 static Semaphore *readAvail;
 static Semaphore *writeDone;
 
+static SynchConsole *synchConsole;
+
 //----------------------------------------------------------------------
 // ConsoleInterruptHandlers
 // 	Wake up the thread that requested the I/O.
@@ -80,5 +82,28 @@ ConsoleTest (char *in, char *out)
 	console->PutChar(ch);	// echo it!
 	writeDone->P() ;        // wait for write to finish
 	if (ch == 'q') return;  // if q, quit
+    }
+}
+
+
+
+//----------------------------------------------------------------------
+// SynchConsoleTest
+// 	Test the synchronous console by echoing characters typed at the input
+//	onto the output.  Stop when the user types a 'q'.
+//----------------------------------------------------------------------
+
+void
+SynchConsoleTest (char *in, char *out)
+{
+    char ch;
+
+    synchConsole = new SynchConsole(in, out);
+
+    for (;;) {
+        ch = synchConsole->GetChar();
+        synchConsole->PutChar(ch); // echo it!
+        if (ch == 'q')
+            return; // if q, quit
     }
 }

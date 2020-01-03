@@ -88,6 +88,10 @@ class FileHeader {
     void setHeaderSector(int sector) { headerSector = sector; }
     int getHeaderSector() { return headerSector; }
 
+//lab5
+    bool ExpandFileSize(BitMap *freeMap, int additionalBytes);
+
+
   private:
     int numBytes;			// Number of bytes in the file
     int numSectors;			// Number of data sectors in the file
